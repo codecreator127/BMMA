@@ -4,6 +4,7 @@ import { createContext, useContext, useState, useEffect, ReactNode } from 'react
 
 interface MembersContextType {
   members: Map<string, number>[]
+  matchHistory: Map<string, number[]>[]
 }
 
 // Dummy data as a list of maps
@@ -19,14 +20,31 @@ const dummy: Map<string, number>[] = [
 const MembersContext = createContext<MembersContextType | undefined>(undefined);
 
 export function MembersProvider({ children }: { children: ReactNode }) {
-  const [names, setNames] = useState<Map<string, number>[]>([]);
+  const [membersLevel, setMembersAndLevel] = useState<Map<string, number>[]>([]);
+  const [membersMatchHistory, setMembersMatchHistory] = useState<Map<string, number[]>[]>([]);
 
   useEffect(() => {
-    setNames(dummy);
+    setMembersAndLevel(dummy);
+
+  // Initialize matchHistory as an array of Maps
+  const matchHistory: Map<string, number[]>[] = [];
+
+    dummy.forEach((memberMap: Map<string, number>) => {
+      // Create a new Map for each member entry
+      const memberHistory = new Map<string, number[]>();
+
+      memberHistory.set(Array.from(memberMap.entries())[0][0], [])
+
+      // Add this Map to the matchHistory array
+      matchHistory.push(memberHistory);
+    });
+
+    setMembersMatchHistory(matchHistory);
+
   }, []); // Runs only once when the component mounts
 
   return (
-    <MembersContext.Provider value={{ members: names }}>
+    <MembersContext.Provider value={{ members: membersLevel, matchHistory: membersMatchHistory }}>
       {children}
     </MembersContext.Provider>
   );

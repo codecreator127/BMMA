@@ -7,11 +7,7 @@ import { useState } from 'react'
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
-  const { members } = useMembers();
-
-  console.log(members);
-
-  const [matchHistory, setMatchHistory] = useState<Record<string, any>>({});
+  const { members, matchHistory } = useMembers();
 
   // Create initial matchHistory dictionary
   let dict: Record<string, any> = {};
@@ -25,11 +21,19 @@ export default function Home() {
 
   const rounds: number = 5; // Define rounds (adjust as needed)
 
+  // takes a list of members and their last played status
+  function selectReady(members: []) {
+
+
+  }
 
   // make into an api call in the future?
-  function makeMatch() {
+  function makeMatch(memberMap: Map<string, number>[], matchHistory: Map<string, number[]>[]) {
     // make this come up with a set of matches and then change the context list
     alert("making match");
+
+    console.log(matchHistory);
+    console.log(memberMap);
 
     alert("matches made");
     return;
@@ -73,7 +77,7 @@ export default function Home() {
       </Link>
 
       <button 
-        onClick={makeMatch}
+        onClick={() => makeMatch(members, matchHistory)}
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
       >
         Make Match
