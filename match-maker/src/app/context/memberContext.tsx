@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
-import Player from '../utils'
+import { Player } from '../utils'
 
 interface MembersContextType {
   membersMap: Map<string, Player>

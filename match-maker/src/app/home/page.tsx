@@ -3,10 +3,8 @@
 import Link from 'next/link'
 import { useTheme } from '@/app/context/themeContext'
 import { useMembers } from '@/app/context/memberContext'
-import { useState } from 'react'
-import { read } from 'fs'
 
-import Player from '../utils'
+import { Player, shuffleArray } from '../utils'
 
 
 const COURTS = 11;
@@ -38,11 +36,14 @@ export default function Home() {
 
 function makeMatch(matchHistory: Map<Player, number[]>) {
   alert("making match");
-  const readyPlayers: Player[] = selectReady(matchHistory);
+  let readyPlayers: Player[] = selectReady(matchHistory);
   let groupedPlayers: Player[][] = Array.from({ length: 11 }, () => []);
   let ungroupedPlayers: Player[] = [];
   let courtsFilled = false;
   let currentRoundPlayers = 0;
+
+  //shuffle players first
+  shuffleArray(readyPlayers);
 
   // First pass - exact level matching
   let i = 0;
