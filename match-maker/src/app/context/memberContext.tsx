@@ -2,49 +2,96 @@
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
+import Player from '../utils'
+
 interface MembersContextType {
-  members: Map<string, number>[]
-  matchHistory: Map<string, number[]>[]
+  membersMap: Map<string, Player>
+  matchHistory: Map<Player, number[]>
+  currentRound: Player[][]
+  setCurrentRoundMatches: (matches: Player[][]) => void;
 }
 
-// Dummy data as a list of maps
-const dummy: Map<string, number>[] = [
-  new Map([["john", 2]]),
-  new Map([["alice", 2]]),
-  new Map([["dharm", 2]]),
-  new Map([["min", 2]]),
-  new Map([["gaea", 2]]),
-  new Map([["vincent", 2]]),
-];
+const nameLevels = new Map<string, number>([
+  ['Liam', 2],
+  ['Emma', 1],
+  ['Noah', 3],
+  ['Olivia', 2],
+  ['William', 1],
+  ['Ava', 3],
+  ['James', 2],
+  ['Isabella', 1], 
+  ['Oliver', 3],
+  ['Sophia', 2],
+  ['Benjamin', 1],
+  ['Charlotte', 3],
+  ['Elijah', 2],
+  ['Mia', 1],
+  ['Lucas', 3],
+  ['Amelia', 2],
+  ['Mason', 1],
+  ['Harper', 3],
+  ['Logan', 2],
+  ['Evelyn', 1],
+  ['Alexander', 3],
+  ['Abigail', 2],
+  ['Ethan', 1],
+  ['Emily', 3],
+  ['Jacob', 2],
+  ['Elizabeth', 1],
+  ['Michael', 3],
+  ['Sofia', 2],
+  ['Daniel', 1],
+  ['Avery', 3],
+  ['Henry', 2],
+  ['Ella', 1],
+  ['Jackson', 3],
+  ['Scarlett', 2],
+  ['Sebastian', 1],
+  ['Victoria', 3],
+  ['Aiden', 2],
+  ['Madison', 1],
+  ['Matthew', 3],
+  ['Luna', 2],
+  ['Samuel', 1],
+  ['Grace', 3],
+  ['David', 2],
+  ['Chloe', 1],
+  ['Joseph', 3],
+  ['Zoe', 2],
+  ['Christopher', 1],
+  ['Penelope', 3],
+  ['Andrew', 2],
+  ['Claire', 1]
+ ]);
 
 const MembersContext = createContext<MembersContextType | undefined>(undefined);
 
 export function MembersProvider({ children }: { children: ReactNode }) {
-  const [membersLevel, setMembersAndLevel] = useState<Map<string, number>[]>([]);
-  const [membersMatchHistory, setMembersMatchHistory] = useState<Map<string, number[]>[]>([]);
+  const [membersObjectMap, setMembers] = useState<Map<string, Player>>(new Map());
+  const [membersMatchHistory, setMembersMatchHistory] = useState<Map<Player, number[]>>(new Map());
+  const [currentRoundMatches, setCurrentRoundMatches] = useState<Player[][]>([]);
 
   useEffect(() => {
-    setMembersAndLevel(dummy);
 
-  // Initialize matchHistory as an array of Maps
-  const matchHistory: Map<string, number[]>[] = [];
+    let membersMap = new Map();
 
-    dummy.forEach((memberMap: Map<string, number>) => {
-      // Create a new Map for each member entry
-      const memberHistory = new Map<string, number[]>();
+    const matchHistory: Map<Player, number[]> = new Map();
 
-      memberHistory.set(Array.from(memberMap.entries())[0][0], [])
+    nameLevels.forEach((level, name) => {
+        let currentPlayer = new Player(name, level);
 
-      // Add this Map to the matchHistory array
-      matchHistory.push(memberHistory);
-    });
+        membersMap.set(name, currentPlayer);
+        matchHistory.set(currentPlayer, [0]);
+      });
 
-    setMembersMatchHistory(matchHistory);
+      setMembers(membersMap);
+      setMembersMatchHistory(matchHistory);
 
   }, []); // Runs only once when the component mounts
 
+
   return (
-    <MembersContext.Provider value={{ members: membersLevel, matchHistory: membersMatchHistory }}>
+    <MembersContext.Provider value={{ membersMap: membersObjectMap, matchHistory: membersMatchHistory, currentRound: currentRoundMatches, setCurrentRoundMatches}}>
       {children}
     </MembersContext.Provider>
   );
