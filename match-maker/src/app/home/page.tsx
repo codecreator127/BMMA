@@ -9,12 +9,11 @@ import { Player, shuffleArray } from '../utils'
 
 const COURTS = 11;
 const MAX_PLAYERS_ON_COURT = COURTS * 4;
+const ROUNDS = 10;
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const { membersMap, matchHistory, setCurrentRoundMatches } = useMembers();
-
-  const rounds: number = 5; // Define rounds (adjust as needed)
 
   // takes a list of members and their last played status
   //outputs a list of players that are ready to play (or closest to ready)
@@ -114,9 +113,9 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
                       currentRoundPlayers++;
                       console.log(`Placed player level ${currentPlayer.level} in group with level ${groupLevel}`);
 
-                      // let matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
-                      // matchHistoryEntry?.push(currentPlayerCourt + 1);
-                      // matchHistory.set(currentPlayer, matchHistoryEntry); 
+                      let matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
+                      matchHistoryEntry?.push(currentPlayerCourt + 1);
+                      matchHistory.set(currentPlayer, matchHistoryEntry); 
 
                       break;
                   }
@@ -165,8 +164,8 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
           return (
             <tr key={rowIndex}>
               <td>{name} ({Player.level})</td>
-              {Array.from({ length: rounds }, (_, colIndex) => (
-                <td key={colIndex}>{history[colIndex] ?? 'N/A'}</td> // Use optional chaining and fallback
+              {Array.from({ length: ROUNDS }, (_, colIndex) => (
+                <td key={colIndex}>{history[colIndex] ?? ' '}</td> // Use optional chaining and fallback
               ))}
             </tr>
           );

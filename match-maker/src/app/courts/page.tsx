@@ -31,7 +31,7 @@ export default function Courts() {
                 {row.map((group, colIndex) => (
                   <td key={colIndex} className="border border-gray-400 w-40 h-40 text-center text-lg font-bold">
                     <p className="p-5">
-                      {group.map(player => player.name).join('\n')}
+                      {group.map(player => player.name + " (" + player.level+ ")").join('\n')}
                     </p>
                   </td>
                 ))}
