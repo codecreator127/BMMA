@@ -21,40 +21,49 @@ export default function Home() {
   //TODO: put committee as low priority
   function selectReady(matchHistory: Map<Player, number[]>): Player[] {
     let readyPlayers: Player[] = [];
-
-    // Iterate over the Map entries directly
-    for (const [player, matches] of matchHistory) {
-        // Check if the last match is 0
-        if (matches[matches.length - 1] === 0) {
+  
+    let matchesAgoPlayed = 1;
+    while (readyPlayers.length < MAX_PLAYERS_ON_COURT) {
+      
+      for (const [player, matches] of matchHistory) {
+        // Check if the matches ago played is 0
+        if (matches[matches.length - matchesAgoPlayed] == 0 && !readyPlayers.includes(player)) {
             readyPlayers.push(player);
         }
-    }
 
+        console.log(readyPlayers.length);
+      }
+      matchesAgoPlayed ++;
+
+    }
     return readyPlayers;
 }
-
 
 function makeMatch(matchHistory: Map<Player, number[]>) {
   alert("making match");
   let readyPlayers: Player[] = selectReady(matchHistory);
-  let groupedPlayers: Player[][] = Array.from({ length: 11 }, () => []);
+  let groupedPlayers: Player[][] = Array.from({ length: COURTS }, () => []);
   let ungroupedPlayers: Player[] = [];
   let courtsFilled = false;
   let currentRoundPlayers = 0;
+
+  console.log(readyPlayers);
+  console.log(matchHistory);
 
   //shuffle players first
   shuffleArray(readyPlayers);
 
   // First pass - exact level matching
-  let i = 0;
-  while (i < readyPlayers.length && !courtsFilled) {
+  for (let i = 0; i < readyPlayers.length; i ++) {
       let grouped: boolean = false;
       let currentPlayer = readyPlayers[i];
+      let currentPlayerCourt = 0;
       
       for (let j = 0; j < groupedPlayers.length; j++) {
           if (groupedPlayers[j].length === 0) {
               groupedPlayers[j].push(currentPlayer);
               grouped = true;
+              currentPlayerCourt = j;
               break;
           }
           else if (groupedPlayers[j].length < 4) {
@@ -63,6 +72,7 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
               if (groupLevel === currentPlayer.level) {
                   groupedPlayers[j].push(currentPlayer);
                   grouped = true;
+                  currentPlayerCourt = j;
                   break;
               }
           }
@@ -76,9 +86,11 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
           ungroupedPlayers.push(currentPlayer);
       } else {
           currentRoundPlayers++;
+          // update current players match history
+          let matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
+          matchHistoryEntry?.push(currentPlayerCourt + 1);
+          matchHistory.set(currentPlayer, matchHistoryEntry);
       }
-
-      i++;
   }
 
   // Second pass - try to place ungrouped players with ±1 level difference
@@ -87,26 +99,32 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
       
       const stillUngrouped: Player[] = [];
       
-      for (const player of ungroupedPlayers) {
+      for (const currentPlayer of ungroupedPlayers) {
           let placed = false;
           
           for (let j = 0; j < groupedPlayers.length; j++) {
               if (groupedPlayers[j].length > 0 && groupedPlayers[j].length < 4) {
                   const groupLevel = groupedPlayers[j][0].level;
+                  const currentPlayerCourt = j;
                   
                   // Check if player's level is within ±1 of the group's level
-                  if (Math.abs(groupLevel - player.level) <= 1) {
-                      groupedPlayers[j].push(player);
+                  if (Math.abs(groupLevel - currentPlayer.level) <= 1) {
+                      groupedPlayers[j].push(currentPlayer);
                       placed = true;
                       currentRoundPlayers++;
-                      console.log(`Placed player level ${player.level} in group with level ${groupLevel}`);
+                      console.log(`Placed player level ${currentPlayer.level} in group with level ${groupLevel}`);
+
+                      // let matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
+                      // matchHistoryEntry?.push(currentPlayerCourt + 1);
+                      // matchHistory.set(currentPlayer, matchHistoryEntry); 
+
                       break;
                   }
               }
           }
           
           if (!placed) {
-              stillUngrouped.push(player);
+            stillUngrouped.push(currentPlayer);
           }
       }
 
@@ -119,6 +137,19 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
   setCurrentRoundMatches(groupedPlayers);
 
 
+  //update all the players who arent playing this round
+  const allPlayers = membersMap.values();
+  const playersNotPlaying = Array.from(allPlayers.filter(player => !groupedPlayers.flat().includes(player)));
+
+  console.log(playersNotPlaying);
+
+  for (const player of playersNotPlaying) {
+    // update current players match history
+    let matchHistoryEntry = matchHistory.get(player) ?? [];
+    matchHistoryEntry?.push(0);
+    matchHistory.set(player, matchHistoryEntry); 
+  }
+
   
   alert("matches made");
   return;
@@ -129,21 +160,17 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
     <div className="items-center justify-items-center min-h-screen p-8 pb-20 gap-16">
     <table className="table-auto border-collapse border border-gray-400">
       <tbody>
-        {Array.from(membersMap).map(([name, Player], rowIndex) => (
-          <tr key={rowIndex}>
-            <td className="border border-gray-400 px-4 py-2 text-center font-bold">
-              {name} ({Player.level})
-            </td>
-            {Array.from({ length: rounds }, (_, colIndex) => (
-              <td
-                key={colIndex}
-                className="border border-gray-400 px-4 py-2 text-center"
-              >
-                {/* Add content for the other columns if needed */}
-              </td>
-            ))}
-          </tr>
-        ))}
+        {Array.from(membersMap).map(([name, Player], rowIndex) => {
+          const history = matchHistory.get(Player) || []; // Default to an empty array
+          return (
+            <tr key={rowIndex}>
+              <td>{name} ({Player.level})</td>
+              {Array.from({ length: rounds }, (_, colIndex) => (
+                <td key={colIndex}>{history[colIndex] ?? 'N/A'}</td> // Use optional chaining and fallback
+              ))}
+            </tr>
+          );
+        })}
       </tbody>
     </table>
 
