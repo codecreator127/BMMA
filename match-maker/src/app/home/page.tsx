@@ -6,6 +6,9 @@ import { useMembers } from '@/app/context/memberContext'
 
 import { Player, shuffleArray } from '../utils'
 
+import CSVUploader from '../csvUploadButton'
+import { init } from '@/app/context/memberContext';
+
 
 const COURTS = 11;
 const MAX_PLAYERS_ON_COURT = COURTS * 4;
@@ -13,7 +16,7 @@ const ROUNDS = 10;
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
-  const { membersMap, matchHistory, setCurrentRoundMatches } = useMembers();
+  const { membersMap, matchHistory, setCurrentRoundMatches, setMembers , setMembersMatchHistory} = useMembers();
 
   // takes a list of members and their last played status
   //outputs a list of players that are ready to play (or closest to ready)
@@ -152,7 +155,20 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
   
   alert("matches made");
   return;
-}
+  }
+
+  const handleCSVData = (data: string[][]) => {
+    console.log('Processed CSV data:', data);
+    
+    const nameLevels : Map<string, number> = new Map();
+    for (const player of data) {
+      const name = player[0];
+      const level = parseInt(player[1]);
+
+      nameLevels.set(name, level);
+    }
+    init(setMembersMatchHistory, setMembers, nameLevels);
+  };
 
 
   return (
@@ -192,6 +208,10 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
       >
         Current theme: {theme}
       </button>
+
+
+
+      <CSVUploader onProcessCSV={handleCSVData} />
     </div>
   );
 }

@@ -9,6 +9,8 @@ interface MembersContextType {
   matchHistory: Map<Player, number[]>
   currentRound: Player[][]
   setCurrentRoundMatches: (matches: Player[][]) => void;
+  setMembers: (memberLevels: Map<string, Player>) => void;
+  setMembersMatchHistory: (memberMatchHistory: Map<Player, number[]>) => void;
 }
 
 const nameLevels = new Map<string, number>([
@@ -66,32 +68,45 @@ const nameLevels = new Map<string, number>([
 
 const MembersContext = createContext<MembersContextType | undefined>(undefined);
 
+export function init(setMatchHistory: (matchHistory: Map<Player, number[]>) => void, setMembers: (members: Map<string, Player>) => void, nameLevels: Map<string, number>) {
+
+  let membersMap = new Map();
+
+  const matchHistory: Map<Player, number[]> = new Map();
+
+  nameLevels.forEach((level, name) => {
+      let currentPlayer = new Player(name, level);
+
+      membersMap.set(name, currentPlayer);
+      matchHistory.set(currentPlayer, [0]);
+    });
+
+    setMembers(membersMap);
+    setMatchHistory(matchHistory);
+
+} 
+
 export function MembersProvider({ children }: { children: ReactNode }) {
   const [membersObjectMap, setMembers] = useState<Map<string, Player>>(new Map());
   const [membersMatchHistory, setMembersMatchHistory] = useState<Map<Player, number[]>>(new Map());
   const [currentRoundMatches, setCurrentRoundMatches] = useState<Player[][]>([]);
+  // const [nameLevel, setNameLevel] = useState<string|number[]>([])
 
   useEffect(() => {
-
-    let membersMap = new Map();
-
-    const matchHistory: Map<Player, number[]> = new Map();
-
-    nameLevels.forEach((level, name) => {
-        let currentPlayer = new Player(name, level);
-
-        membersMap.set(name, currentPlayer);
-        matchHistory.set(currentPlayer, [0]);
-      });
-
-      setMembers(membersMap);
-      setMembersMatchHistory(matchHistory);
+    init(setMembersMatchHistory, setMembers, nameLevels);
 
   }, []); // Runs only once when the component mounts
 
+  
+  useEffect(() => {
+
+    console.log(membersObjectMap);
+
+  }, [membersObjectMap]);
+
 
   return (
-    <MembersContext.Provider value={{ membersMap: membersObjectMap, matchHistory: membersMatchHistory, currentRound: currentRoundMatches, setCurrentRoundMatches}}>
+    <MembersContext.Provider value={{ membersMap: membersObjectMap, matchHistory: membersMatchHistory, currentRound: currentRoundMatches, setCurrentRoundMatches, setMembers, setMembersMatchHistory}}>
       {children}
     </MembersContext.Provider>
   );
