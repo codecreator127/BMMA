@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { useTheme } from '@/app/context/themeContext'
+// import { useTheme } from '@/app/context/themeContext'
 import { useMembers } from '@/app/context/memberContext'
 
 import { Player, shuffleArray } from '../utils'
@@ -15,10 +15,9 @@ import Timer from '../timer'
 const COURTS = 11;
 const MAX_PLAYERS_ON_COURT = COURTS * 4;
 const ROUNDS = 10;
-const MEMBERS_PER_TABLE = 25;
 
 export default function Home() {
-  const { theme, toggleTheme } = useTheme();
+  // const { theme, toggleTheme } = useTheme();
   const { membersMap, matchHistory, setCurrentRoundMatches, setMembers , setMembersMatchHistory} = useMembers();
 
   const [sortBy, setSortBy] = useState('name');
@@ -83,7 +82,7 @@ export default function Home() {
   //outputs a list of players that are ready to play (or closest to ready)
   //TODO: put committee as low priority
   function selectReady(matchHistory: Map<Player, number[]>): Player[] {
-    let readyPlayers: Player[] = [];
+    const readyPlayers: Player[] = [];
   
     let matchesAgoPlayed = 1;
     while (readyPlayers.length < MAX_PLAYERS_ON_COURT) {
@@ -104,10 +103,9 @@ export default function Home() {
 
 function makeMatch(matchHistory: Map<Player, number[]>) {
   alert("making match");
-  let readyPlayers: Player[] = selectReady(matchHistory);
-  let groupedPlayers: Player[][] = Array.from({ length: COURTS }, () => []);
+  const readyPlayers: Player[] = selectReady(matchHistory);
+  const groupedPlayers: Player[][] = Array.from({ length: COURTS }, () => []);
   let ungroupedPlayers: Player[] = [];
-  let courtsFilled = false;
   let currentRoundPlayers = 0;
 
   console.log(readyPlayers);
@@ -119,7 +117,7 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
   // First pass - exact level matching
   for (let i = 0; i < readyPlayers.length; i ++) {
       let grouped: boolean = false;
-      let currentPlayer = readyPlayers[i];
+      const currentPlayer = readyPlayers[i];
       let currentPlayerCourt = 0;
       
       for (let j = 0; j < groupedPlayers.length; j++) {
@@ -130,7 +128,7 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
               break;
           }
           else if (groupedPlayers[j].length < 4) {
-              let groupLevel = groupedPlayers[j][0].level;
+              const groupLevel = groupedPlayers[j][0].level;
               
               if (groupLevel === currentPlayer.level) {
                   groupedPlayers[j].push(currentPlayer);
@@ -142,7 +140,7 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
       }
 
       if (currentRoundPlayers === MAX_PLAYERS_ON_COURT) {
-          courtsFilled = true;
+          break;
       }
 
       if (!grouped) {
@@ -150,7 +148,7 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
       } else {
           currentRoundPlayers++;
           // update current players match history
-          let matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
+          const matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
           matchHistoryEntry?.push(currentPlayerCourt + 1);
           matchHistory.set(currentPlayer, matchHistoryEntry);
       }
@@ -177,7 +175,7 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
                       currentRoundPlayers++;
                       console.log(`Placed player level ${currentPlayer.level} in group with level ${groupLevel}`);
 
-                      let matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
+                      const matchHistoryEntry = matchHistory.get(currentPlayer) ?? [];
                       matchHistoryEntry?.push(currentPlayerCourt + 1);
                       matchHistory.set(currentPlayer, matchHistoryEntry); 
 
@@ -208,7 +206,7 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
 
   for (const player of playersNotPlaying) {
     // update current players match history
-    let matchHistoryEntry = matchHistory.get(player) ?? [];
+    const matchHistoryEntry = matchHistory.get(player) ?? [];
     matchHistoryEntry?.push(0);
     matchHistory.set(player, matchHistoryEntry); 
   }

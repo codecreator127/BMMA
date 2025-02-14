@@ -70,12 +70,12 @@ const MembersContext = createContext<MembersContextType | undefined>(undefined);
 
 export function init(setMatchHistory: (matchHistory: Map<Player, number[]>) => void, setMembers: (members: Map<string, Player>) => void, nameLevels: Map<string, number>) {
 
-  let membersMap = new Map();
+  const membersMap = new Map();
 
   const matchHistory: Map<Player, number[]> = new Map();
 
   nameLevels.forEach((level, name) => {
-      let currentPlayer = new Player(name, level);
+      const currentPlayer = new Player(name, level);
 
       membersMap.set(name, currentPlayer);
       matchHistory.set(currentPlayer, [0]);

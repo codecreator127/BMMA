@@ -1,16 +1,12 @@
 "use client"
-import Image from "next/image";
-import { useState } from "react";
 import Link from "next/link";
 
 import { useMembers } from "../context/memberContext";
-import { useTheme } from "../context/themeContext";
-
-const ROUNDS = 10;
+// import { useTheme } from "../context/themeContext";
 
 export default function Courts() {
 
-  const { theme, toggleTheme } = useTheme();
+  // const { theme, toggleTheme } = useTheme();
   const { currentRound } = useMembers();
 
   console.log(currentRound);
