@@ -8,15 +8,76 @@ import { Player, shuffleArray } from '../utils'
 
 import CSVUploader from '../csvUploadButton'
 import { init } from '@/app/context/memberContext';
+import { useState } from 'react'
+import Timer from '../timer'
 
 
 const COURTS = 11;
 const MAX_PLAYERS_ON_COURT = COURTS * 4;
 const ROUNDS = 10;
+const MEMBERS_PER_TABLE = 25;
 
 export default function Home() {
   const { theme, toggleTheme } = useTheme();
   const { membersMap, matchHistory, setCurrentRoundMatches, setMembers , setMembersMatchHistory} = useMembers();
+
+  const [sortBy, setSortBy] = useState('name');
+
+  const sortedMembers = (): [string, Player][] => {
+    const members = Array.from(membersMap as Map<string, Player>);
+    
+    if (sortBy === 'name') {
+      return members.sort(([nameA], [nameB]) => nameA.localeCompare(nameB));
+    } else if (sortBy === 'level') {
+      return members.sort(([, playerA], [, playerB]) => playerB.level - playerA.level);
+    }
+    return members;
+  };
+
+  const splitIntoTables = (members: [string, Player][]): [string, Player][][] => {
+    const tables: [string, Player][][] = [[], []]; // Ensuring exactly two tables
+    members.forEach((member, index) => {
+      const tableIndex = Math.floor(index / (members.length / 2)); // Split evenly into 2 tables
+      tables[tableIndex].push(member);
+    });
+    return tables;
+  };
+  const renderTable = (members: [string, Player][], tableIndex: number) => (
+    <div key={tableIndex} className="w-full" style={{ 
+      transform: 'scale(0.9)',
+      transformOrigin: 'top left',
+      margin: '0 auto'
+    }}>
+      <div className="overflow-x-auto">
+        <table className="table-auto border-collapse border border-gray-400 w-full text-sm">
+          <thead>
+            <tr>
+              <th className="border px-2 py-1">Player (Level)</th>
+              {Array.from({ length: ROUNDS }, (_, i) => (
+                <th key={i} className="border px-2 py-1 w-8">R{i + 1}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {members.map(([name, player], rowIndex) => {
+              const history = matchHistory.get(player) || [];
+              return (
+                <tr key={rowIndex}>
+                  <td className="border px-2 py-1">{name} ({player.level})</td>
+                  {Array.from({ length: ROUNDS }, (_, colIndex) => (
+                    <td key={colIndex} className="border px-2 py-1 text-center">
+                      {history[colIndex] ?? ' '}
+                    </td>
+                  ))}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+    const tables = splitIntoTables(sortedMembers());
 
   // takes a list of members and their last played status
   //outputs a list of players that are ready to play (or closest to ready)
@@ -39,7 +100,7 @@ export default function Home() {
 
     }
     return readyPlayers;
-}
+  }
 
 function makeMatch(matchHistory: Map<Player, number[]>) {
   alert("making match");
@@ -173,45 +234,44 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
 
   return (
     <div className="items-center justify-items-center min-h-screen p-8 pb-20 gap-16">
-    <table className="table-auto border-collapse border border-gray-400">
-      <tbody>
-        {Array.from(membersMap).map(([name, Player], rowIndex) => {
-          const history = matchHistory.get(Player) || []; // Default to an empty array
-          return (
-            <tr key={rowIndex}>
-              <td>{name} ({Player.level})</td>
-              {Array.from({ length: ROUNDS }, (_, colIndex) => (
-                <td key={colIndex}>{history[colIndex] ?? ' '}</td> // Use optional chaining and fallback
-              ))}
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
+      <div className="mb-4">
+        <select 
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="p-2 border rounded bg-white dark:bg-gray-800 dark:text-white"
+        >
+          <option value="name">Sort by Name</option>
+          <option value="level">Sort by Level</option>
+        </select>
+      </div>
 
-      <Link href="courts">
-        <div className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-          Current Games
-        </div>
-      </Link>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {tables.map((members, index) => renderTable(members, index))}
+      </div>
+      
+        <div className='flex flex-row items-center gap-x-4 p-4'>
+        <Link href="courts">
+          <div className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+            Current Games
+          </div>
+        </Link>
 
-      <button 
-        onClick={() => makeMatch(matchHistory)}
-        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-      >
-        Make Match
-      </button>
+        <button 
+          onClick={() => makeMatch(matchHistory)}
+          className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+        >
+          Make Match
+        </button>
 
-      <button 
-        onClick={toggleTheme}
-        className={`p-2 rounded ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}
-      >
-        Current theme: {theme}
-      </button>
-
-
-
-      <CSVUploader onProcessCSV={handleCSVData} />
+        <CSVUploader onProcessCSV={handleCSVData} />
+        {/* <button 
+          onClick={toggleTheme}
+          className={`p-2 rounded ${theme === 'dark' ? 'bg-gray-800 text-white' : 'bg-gray-200 text-black'}`}
+        >
+          Current theme: {theme}
+        </button> */}
+        <Timer/>
+      </div>
     </div>
   );
 }
