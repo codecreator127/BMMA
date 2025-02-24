@@ -6,19 +6,19 @@ import { useMembers } from '@/app/context/memberContext'
 
 import { Player, shuffleArray } from '../utils'
 
-import CSVUploader from '../csvUploadButton'
+import CSVUploader from '../../components/csvUploadButton'
 import { init } from '@/app/context/memberContext';
 import { useState } from 'react'
-import Timer from '../timer'
-
-
-const COURTS = 11;
-const MAX_PLAYERS_ON_COURT = COURTS * 4;
-const ROUNDS = 10;
+import Timer from '../../components/timer'
+import { useSettings } from '../context/settingsContext'
 
 export default function Home() {
   // const { theme, toggleTheme } = useTheme();
   const { membersMap, matchHistory, setCurrentRoundMatches, setMembers , setMembersMatchHistory} = useMembers();
+
+  const { courts, rounds } = useSettings();
+
+  const MAX_PLAYERS_ON_COURT = courts * 4;
 
   const [sortBy, setSortBy] = useState('name');
 
@@ -52,7 +52,7 @@ export default function Home() {
           <thead>
             <tr>
               <th className="border px-2 py-1">Player (Level)</th>
-              {Array.from({ length: ROUNDS }, (_, i) => (
+              {Array.from({ length: rounds }, (_, i) => (
                 <th key={i} className="border px-2 py-1 w-8">R{i + 1}</th>
               ))}
             </tr>
@@ -63,7 +63,7 @@ export default function Home() {
               return (
                 <tr key={rowIndex}>
                   <td className="border px-2 py-1">{name} ({player.level})</td>
-                  {Array.from({ length: ROUNDS }, (_, colIndex) => (
+                  {Array.from({ length: rounds }, (_, colIndex) => (
                     <td key={colIndex} className="border px-2 py-1 text-center">
                       {history[colIndex] ?? ' '}
                     </td>
@@ -104,7 +104,7 @@ export default function Home() {
 function makeMatch(matchHistory: Map<Player, number[]>) {
   alert("making match");
   const readyPlayers: Player[] = selectReady(matchHistory);
-  const groupedPlayers: Player[][] = Array.from({ length: COURTS }, () => []);
+  const groupedPlayers: Player[][] = Array.from({ length: courts }, () => []);
   let ungroupedPlayers: Player[] = [];
   let currentRoundPlayers = 0;
 
@@ -260,6 +260,14 @@ function makeMatch(matchHistory: Map<Player, number[]>) {
         >
           Make Match
         </button>
+
+        <div className="p-5">
+          <Link href="/settings">
+            <div className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
+              Settings
+            </div>
+          </Link>
+        </div>
 
         <CSVUploader onProcessCSV={handleCSVData} />
         {/* <button 
