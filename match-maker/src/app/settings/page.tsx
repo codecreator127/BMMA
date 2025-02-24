@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 export default function Settings() {
   const [newCourts, setNewCourts] = useState<string>('');
   const [newRounds, setNewRounds] = useState<string>('');
-  const { courts, setCourts, setRounds } = useSettings();
+  const { setCourts, setRounds } = useSettings();
 
   const handleSaveChanges = (): void => {
     if (newCourts || newRounds) {
