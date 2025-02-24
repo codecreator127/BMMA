@@ -23,12 +23,33 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import PopupForm from '@/components/addNewPlayer'
 
   export default function Home() {
-    const { membersMap, matchHistory, setCurrentRoundMatches, setMembers, setMembersMatchHistory } = useMembers();
+  const { membersMap, matchHistory, setCurrentRoundMatches, setMembers, setMembersMatchHistory } = useMembers();
   const { courts, rounds } = useSettings();
   const MAX_PLAYERS_ON_COURT = courts * 4;
   const [sortBy, setSortBy] = useState('name');
+
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
+
+  const handleFormSubmitNewPlayer = (name: string, level: number) => {
+    console.log("Player added:", { name, level });
+    // Handle the player submission logic here
+    const newPlayer: Player = new Player(name, level);
+    membersMap.set(name, newPlayer);
+    setMembers(membersMap);
+
+    const anyPlayer = matchHistory.keys().toArray()[0];
+
+    const roundsPassed = matchHistory.get(anyPlayer)?.length;
+    if (roundsPassed) {
+      console.log(roundsPassed);
+      matchHistory.set(newPlayer, Array.from({ length: roundsPassed }, () => 0));
+      setMembersMatchHistory(matchHistory);
+    }
+
+  };
 
   // Keep existing functions (sortedMembers, splitIntoTables, makeMatch, etc.)
   const sortedMembers = (): [string, Player][] => {
@@ -282,6 +303,14 @@ import {
               </Link>
   
               <CSVUploader onProcessCSV={handleCSVData} />
+
+              <Button onClick={() => setIsPopupOpen(true)}>Add Player</Button>
+
+              <PopupForm
+                isOpen={isPopupOpen}
+                onClose={() => setIsPopupOpen(false)}
+                onSubmit={handleFormSubmitNewPlayer}
+              />
 
             </div>
           </div>
