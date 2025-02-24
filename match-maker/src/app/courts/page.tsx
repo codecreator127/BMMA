@@ -3,6 +3,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useMembers } from "../context/memberContext";
 import { Player } from "../utils";
+import { Button } from "@/components/ui/button";
 
 export default function Courts() {
   const { currentRound, updatePlayerMatchHistory, setCurrentRoundMatches, membersMap } = useMembers();
@@ -107,10 +108,13 @@ export default function Courts() {
       </table>
       
       <div className="p-5">
-        <Link href="/home">
-          <div className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">
-            Home
-          </div>
+        <Link href="/home" className="w-full sm:w-auto">
+          <Button 
+            variant="outline"
+            className="w-full"
+          >
+            Back to Home
+          </Button>
         </Link>
       </div>
     </div>

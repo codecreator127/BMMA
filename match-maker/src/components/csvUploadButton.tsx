@@ -1,5 +1,7 @@
 import React, { useCallback } from 'react';
 
+import { Button } from './ui/button';
+
 interface CSVUploaderProps {
   onProcessCSV: (data: string[][]) => void;
   accept?: string;
@@ -31,12 +33,12 @@ const CSVUploader: React.FC<CSVUploaderProps> = ({
 
   return (
     <div className={`flex ${className}`}>
-      <button
+      <Button
         onClick={() => document.getElementById('csv-upload')?.click()}
         className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors"
       >
         Upload CSV
-      </button>
+      </Button>
       <input
         type="file"
         accept={accept}

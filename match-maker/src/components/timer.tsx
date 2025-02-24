@@ -1,4 +1,7 @@
 import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { PlayCircle, PauseCircle, RotateCcw } from "lucide-react";
 
 const Timer: React.FC = () => {
   const [time, setTime] = useState(60 * 1);
@@ -18,7 +21,6 @@ const Timer: React.FC = () => {
     }
     return () => timer && clearInterval(timer);
   }, [isRunning, time]);
-  
 
   const startTimer = () => setIsRunning(true);
   const pauseTimer = () => setIsRunning(false);
@@ -26,28 +28,53 @@ const Timer: React.FC = () => {
     setIsRunning(false);
     setTime(inputTime * 60);
   };
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputTime(Number(e.target.value));
   };
 
   return (
-    <div className="flex flex-col items-center gap-4 p-4 bg-gray-100 rounded-lg shadow-md">
-      <h1 className="text-2xl font-bold">Countdown: {Math.floor(time / 60)}:{String(time % 60).padStart(2, '0')}</h1>
-      <input
+    <div className="flex items-center gap-4">
+      <div className="text-2xl font-semibold min-w-[100px] text-center">
+        {Math.floor(time / 60)}:{String(time % 60).padStart(2, '0')}
+      </div>
+      
+      <Input
         type="number"
         value={inputTime}
         onChange={handleChange}
-        className="px-2 py-1 border border-gray-300 rounded-lg"
+        className="w-20 text-center"
+        min={1}
       />
-      <div className="flex gap-2">
-        {!isRunning ? (
-          <button onClick={startTimer} className="px-4 py-2 bg-green-500 text-white rounded-lg">Start</button>
-        ) : (
-          <button onClick={pauseTimer} className="px-4 py-2 bg-yellow-500 text-white rounded-lg">Pause</button>
-        )}
-        <button onClick={resetTimer} className="px-4 py-2 bg-red-500 text-white rounded-lg">Reset</button>
-      </div>
+      
+      {!isRunning ? (
+        <Button
+          onClick={startTimer}
+          variant="default"
+          size="sm"
+        >
+          <PlayCircle className="mr-2 h-4 w-4" />
+          Start
+        </Button>
+      ) : (
+        <Button
+          onClick={pauseTimer}
+          variant="secondary"
+          size="sm"
+        >
+          <PauseCircle className="mr-2 h-4 w-4" />
+          Pause
+        </Button>
+      )}
+      
+      <Button
+        onClick={resetTimer}
+        variant="destructive"
+        size="sm"
+      >
+        <RotateCcw className="mr-2 h-4 w-4" />
+        Reset
+      </Button>
     </div>
   );
 };
